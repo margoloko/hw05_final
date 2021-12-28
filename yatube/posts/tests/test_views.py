@@ -24,7 +24,6 @@ PROFILE_FOLLOW = reverse('posts:profile_follow',
                          kwargs={'username': 'auth-follow'})
 PROFILE_UNFOLLOW = reverse('posts:profile_unfollow',
                            kwargs={'username': 'auth-follow'})
-RDR_GUEST = '/auth/login/?next=/profile/auth-follow/follow/'
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
@@ -221,39 +220,38 @@ class PageTests(TestCase):
         self.assertNotEqual(response_cache, response)
 
     def test_follow(self):
-        """Проверка работы функций отписки и подписки на авторов."""
+        """Проверка работы функций подписки на авторов."""
         follows_before = Follow.objects.count()
         self.author_test_client.get(PROFILE_FOLLOW)
         self.assertEqual(Follow.objects.count(), follows_before + 1)
         self.assertTrue(Follow.objects.filter(
             author=PageTests.follow.author).exists())
-        follows_after = Follow.objects.count()
+
+    def test_unfollow(self):
+        """Проверка работы функций отписки от автора."""
+        self.author_test_client.get(PROFILE_FOLLOW)
+        follows_before = Follow.objects.count()
         self.author_test_client.get(PROFILE_UNFOLLOW)
-        self.assertEqual(Follow.objects.count(), follows_after - 1)
+        self.assertEqual(Follow.objects.count(), follows_before - 1)
         self.assertFalse(Follow.objects.filter(
             author=self.author_follow).exists())
 
     def test_follow_redirect_for_unauth(self):
         """Проверка редиректа неавторизированного пользователя
         для функции подписки."""
+        redirect = '/auth/login/?next=/profile/auth-follow/follow/'
         response = self.guest_client.get(PROFILE_FOLLOW)
-        self.assertRedirects(response, RDR_GUEST)
+        self.assertRedirects(response, redirect)
 
     def test_follow_context(self):
         """Проверка появления записей в ленте у подписчиков,
         и отсутствие поста в избранном у неподписанного пользователя"""
-        self.author_test_client.get(reverse('posts:profile_follow',
-                                            kwargs={'username': 'auth'}))
-        response = self.author_test_client.get('/follow/')
+        Follow.objects.create(author=self.author, user=self.author_follow)
+        response = self.author_follow_client.get('/follow/')
         first_object = response.context['page_obj'][0]
         self.assertEqual(first_object.text, 'Тестовая запись')
         self.assertEqual(first_object.group.title, 'Тестовая группа')
-        form_data = {
-            'group': PageTests.group.pk,
-            'text': 'А ты не подписан', }
-        self.author_follow_client.post(POST_CREATE_URL,
-                                       data=form_data,
-                                       follow=True)
+        Post.objects.create(text='А ты не подписан', author=self.author_follow)
         post = Post.objects.get(text='А ты не подписан')
         response_unfollow = self.author_test_client.get('/follow/')
         self.assertNotContains(response_unfollow, post)

@@ -12,7 +12,6 @@ from ..models import Post, Group, Comment
 
 User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
-RDR = '/auth/login/?next=/posts/1/comment/'
 
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
@@ -132,6 +131,7 @@ class PostFormTests(TestCase):
 
     def test_add_comment_for_guest_client(self):
         """У неавторизированного пользователя нет прав комментировать посты."""
+        redirect = '/auth/login/?next=/posts/1/comment/'
         count_comment = Comment.objects.count()
         form_data = {'text': 'Новый комментарий'}
         response = self.guest_client.post(
@@ -139,5 +139,5 @@ class PostFormTests(TestCase):
             data=form_data,
             follow=True)
         self.assertEqual(Comment.objects.count(), count_comment)
-        self.assertRedirects(response, RDR, status_code=302,
+        self.assertRedirects(response, redirect, status_code=302,
                              target_status_code=200)

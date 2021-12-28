@@ -34,8 +34,7 @@ class StaticURLTests(TestCase):
             description='Тестовое описание',)
         cls.post = Post.objects.create(
             text='Тестовая группа',
-            author=cls.author,
-        )
+            author=cls.author,)
 
     def setUp(self) -> None:
         self.guest_client = Client()

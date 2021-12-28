@@ -60,9 +60,7 @@ def post_detail(request: HttpRequest, post_id: int) -> HttpResponse:
     post_page = Post.objects.get(pk=post_id)
     post_count = Post.objects.filter(author=post_page.author).count()
     comments = Comment.objects.filter(post_id=post_id)
-
     form = CommentForm()
-
     context = {'post_page': post_page,
                'post_count': post_count,
                'form': form,
@@ -127,8 +125,7 @@ def follow_index(request: HttpRequest) -> HttpResponse:
     """ Функция генерирует страницу с постами авторов,
     на которых подписан пользователь."""
     template = 'posts/follow.html'
-    authors = Follow.objects.filter(user=request.user)
-    posts_list = Post.objects.filter(author__following__in=authors)
+    posts_list = Post.objects.filter(author__following__user=request.user)
     page_obj = paginator(request, posts_list)
     context = {'page_obj': page_obj, }
     return render(request, template, context)
@@ -139,8 +136,8 @@ def profile_follow(request, username):
     """ Функция для подписки на авторов."""
     template = 'posts:profile'
     author = User.objects.get(username=username)
-    exist_following = bool(Follow.objects.filter(user=request.user,
-                                                 author=author))
+    exist_following = Follow.objects.filter(user=request.user,
+                                            author=author).exists()
     if request.user.username != username and not exist_following:
         Follow.objects.create(user=request.user, author=author)
     return redirect(template, username=username)
