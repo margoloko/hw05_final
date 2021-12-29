@@ -222,14 +222,14 @@ class PageTests(TestCase):
     def test_follow(self):
         """Проверка работы функций подписки на авторов."""
         follows_before = Follow.objects.count()
-        self.author_test_client.get(PROFILE_FOLLOW)
+        Follow.objects.create(author=self.author, user=self.author_test)
         self.assertEqual(Follow.objects.count(), follows_before + 1)
         self.assertTrue(Follow.objects.filter(
             author=PageTests.follow.author).exists())
 
     def test_unfollow(self):
         """Проверка работы функций отписки от автора."""
-        self.author_test_client.get(PROFILE_FOLLOW)
+        Follow.objects.create(author=self.author_follow, user=self.author_test)
         follows_before = Follow.objects.count()
         self.author_test_client.get(PROFILE_UNFOLLOW)
         self.assertEqual(Follow.objects.count(), follows_before - 1)
