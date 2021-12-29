@@ -222,7 +222,7 @@ class PageTests(TestCase):
     def test_follow(self):
         """Проверка работы функций подписки на авторов."""
         follows_before = Follow.objects.count()
-        Follow.objects.create(author=self.author, user=self.author_test)
+        Follow.objects.create(author=self.author, user=self.author_follow)
         self.assertEqual(Follow.objects.count(), follows_before + 1)
         self.assertTrue(Follow.objects.filter(
             author=PageTests.follow.author).exists())
