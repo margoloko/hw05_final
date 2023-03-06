@@ -7,14 +7,23 @@ To run this application on your local machine, follow these steps:
 
 Clone this repository onto your machine
 Install Django and other required packages by running 
+```
 pip install -r requirements.txt
+```
 in your terminal or command prompt.
-Migrate the database by running python manage.py migrate in your terminal or command prompt.
+Migrate the database by running 
+```
+python manage.py migrate 
+```
+in your terminal or command prompt.
 Start the development server by running 
+```
 python manage.py runserver 
+```
 in your terminal or command prompt.
 Open your web browser and go to http://localhost:8000/ to view the home page.
-Functionality
+
+### Functionality
 User Authentication and Authorization
 This application uses the built-in Django authentication system to allow users to sign up, log in, and log out. Users can only edit their own posts and profiles, and they can only delete their own comments.
 
