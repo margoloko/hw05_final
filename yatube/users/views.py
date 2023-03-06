@@ -1,3 +1,6 @@
+"""This code sets up a sign-up view that displays a form to create a new user account, 
+validates the form data, and saves the new user object to the database if the form data is valid.
+It then redirects the user to the posts app's index page upon successful submission."""
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 
