@@ -9,6 +9,9 @@ from .models import Post, Group, User, Comment, Follow
 
 
 def paginator(request: HttpRequest, posts):
+    """This function takes an HTTP request and a list
+    of posts as input and returns a paginated page
+    object containing the posts."""
     paginator = Paginator(posts, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -16,7 +19,8 @@ def paginator(request: HttpRequest, posts):
 
 
 def index(request: HttpRequest) -> HttpResponse:
-    """ Функция выводит на главную страницу десять последних постов."""
+    """This function takes an HTTP request as input and
+    returns the ten most recent posts on the homepage."""
     template = 'posts/index.html'
     post_list = Post.objects.all()
     page_obj = paginator(request, post_list)
@@ -25,8 +29,9 @@ def index(request: HttpRequest) -> HttpResponse:
 
 
 def group_posts(request: HttpRequest, slug: str) -> HttpResponse:
-    """ Функция group_posts передаёт в шаблон posts/group_list.html десять
-    последних объектов модели Post, принадлежащих соответствующей группе."""
+    """This function takes an HTTP request and a slug (a short label)
+    as input and returns the ten most recent posts that belong
+    to the specified group.."""
     template = 'posts/group_list.html'
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all()
@@ -37,7 +42,9 @@ def group_posts(request: HttpRequest, slug: str) -> HttpResponse:
 
 
 def profile(request: HttpRequest, username: str) -> HttpResponse:
-    """ Функция для отображения профиля пользователя."""
+    """This function takes an HTTP request and a username as input
+    and returns the user's profile page, along with all of their
+    posts and the option to follow or unfollow them."""
     template = 'posts/profile.html'
     author = get_object_or_404(User, username=username)
     posts = Post.objects.filter(author=author)
@@ -55,7 +62,9 @@ def profile(request: HttpRequest, username: str) -> HttpResponse:
 
 
 def post_detail(request: HttpRequest, post_id: int) -> HttpResponse:
-    """ Функция выводит детальную информацию о посте."""
+    """This function takes an HTTP request and a post ID as input and
+    returns a page containing the post's details, including
+    the author, text, and comments."""
     template = 'posts/post_detail.html'
     post_page = Post.objects.get(pk=post_id)
     post_count = Post.objects.filter(author=post_page.author).count()
@@ -70,7 +79,8 @@ def post_detail(request: HttpRequest, post_id: int) -> HttpResponse:
 
 @login_required
 def post_create(request: HttpRequest) -> HttpResponse:
-    """ Функция для создания поста."""
+    """This function takes an HTTP request as input and
+    creates a new post using the provided form data."""
     template = 'posts/post_create.html'
     form = PostForm()
     context = {'form': form}
@@ -90,7 +100,8 @@ def post_create(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def post_edit(request: HttpRequest, post_id: int) -> HttpResponse:
-    """ Функция для редактирования поста."""
+    """This function takes an HTTP request and a post ID as input
+    and allows the user to edit an existing post."""
     post = get_object_or_404(Post, id=post_id)
     if post.author != request.user:
         return redirect('posts:post_detail', post_id=post_id)
@@ -110,6 +121,8 @@ def post_edit(request: HttpRequest, post_id: int) -> HttpResponse:
 
 @login_required
 def add_comment(request: HttpRequest, post_id: int) -> HttpResponse:
+    """This function takes an HTTP request and a post ID as input
+    and allows the user to add a comment to the specified post."""
     form = CommentForm(request.POST or None)
     post = get_object_or_404(Post, pk=post_id)
     if form.is_valid():
@@ -122,8 +135,9 @@ def add_comment(request: HttpRequest, post_id: int) -> HttpResponse:
 
 @login_required
 def follow_index(request: HttpRequest) -> HttpResponse:
-    """ Функция генерирует страницу с постами авторов,
-    на которых подписан пользователь."""
+    """This function takes an HTTP request as input and returns a page
+    containing all of the posts from the users
+    the current user is following."""
     template = 'posts/follow.html'
     posts_list = Post.objects.filter(author__following__user=request.user)
     page_obj = paginator(request, posts_list)
@@ -133,7 +147,8 @@ def follow_index(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def profile_follow(request, username):
-    """ Функция для подписки на авторов."""
+    """This function takes an HTTP request and a username as input
+    and allows the user to follow the specified user."""
     template = 'posts:profile'
     author = User.objects.get(username=username)
     exist_following = Follow.objects.filter(user=request.user,
@@ -145,7 +160,8 @@ def profile_follow(request, username):
 
 @login_required
 def profile_unfollow(request, username):
-    """ Функция для редактирования поста."""
+    """This function takes an HTTP request and a username as input
+    and allows the user to unfollow the specified user."""
     author = User.objects.get(username=username)
     Follow.objects.get(user=request.user, author=author).delete()
     return redirect('posts:profile', username=username)
