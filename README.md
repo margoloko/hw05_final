@@ -45,4 +45,4 @@ Users can follow other users and view their posts on their homepage. They can al
 - Pythonanywhere
 
 ### Author:
-Balakhonova Marina
+[Balakhonova Marina](https://github.com/margoloko)
